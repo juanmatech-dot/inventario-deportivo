@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes — Bienestar Universitario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --verde:#1a8c4e; --verde-dk:#0f5c33; --verde-lt:#e8f8f0;
+      --negro:#0d0d0d; --gris-bg:#f6f6f4; --gris-bd:#e2e2da; --gris-md:#888880; --blanco:#ffffff;
+      --rojo:#d63031; --amarillo:#f39c12; --azul:#2980b9; --azul-lt:#eaf4fb; --morado:#8e44ad; --morado-lt:#f5eef8;
+    }
+
+    @keyframes fadeInDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeInUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+    @keyframes slideInLeft{ from{opacity:0;transform:translateX(-24px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes scaleIn    { from{opacity:0;transform:scale(0.93)}       to{opacity:1;transform:scale(1)} }
+
+    body { font-family:'Barlow',sans-serif; background:var(--gris-bg); color:var(--negro); min-height:100vh; }
+
+    nav { background:var(--negro); display:flex; align-items:center; justify-content:space-between; padding:0 2rem; height:60px; position:sticky; top:0; z-index:100; animation:fadeInDown 0.5s ease both; }
+    .nav-brand { font-family:'Barlow Condensed',sans-serif; font-size:1.3rem; font-weight:800; color:var(--blanco); text-transform:uppercase; letter-spacing:1px; }
+    .nav-brand span { color:#6ee4a6; }
+    .nav-right { display:flex; align-items:center; gap:1rem; }
+    .nav-links a { color:rgba(255,255,255,0.65); font-size:0.85rem; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; transition:background 0.2s,color 0.2s; }
+    .nav-links a:hover { background:rgba(255,255,255,0.1); color:var(--blanco); }
+    .nav-links a.activo { color:#6ee4a6; }
+    .nav-usuario { font-size:0.85rem; color:rgba(255,255,255,0.55); }
+    .nav-usuario strong { color:var(--blanco); }
+    .btn-logout { padding:0.4rem 1rem; border:1px solid rgba(255,255,255,0.2); background:transparent; color:rgba(255,255,255,0.7); border-radius:6px; font-size:0.8rem; cursor:pointer; transition:background 0.2s; }
+    .btn-logout:hover { background:rgba(255,255,255,0.1); }
+
+    main { padding:2rem; max-width:1100px; margin:0 auto; }
+
+    /* Tabs */
+    .tabs { display:flex; gap:0.5rem; margin-bottom:2rem; background:var(--blanco); border:1px solid var(--gris-bd); border-radius:12px; padding:0.4rem; width:fit-content; animation:fadeInUp 0.4s ease both; }
+    .tab { padding:0.55rem 1.4rem; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; border:none; background:transparent; color:var(--gris-md); transition:background 0.2s, color 0.2s; }
+    .tab.activo { background:var(--negro); color:var(--blanco); }
+
+    /* Panel */
+    .panel { display:none; animation:fadeInUp 0.35s ease both; }
+    .panel.activo { display:block; }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat { background:var(--blanco); border:1px solid var(--gris-bd); border-radius:12px; padding:1.1rem 1.3rem; animation:fadeInUp 0.5s ease both; }
+    .stat:nth-child(1){animation-delay:0.05s}.stat:nth-child(2){animation-delay:0.1s}
+    .stat:nth-child(3){animation-delay:0.15s}.stat:nth-child(4){animation-delay:0.2s}
+    .stat .num { font-family:'Barlow Condensed',sans-serif; font-size:2rem; font-weight:700; line-height:1; }
+    .stat .lbl { font-size:0.78rem; color:var(--gris-md); margin-top:4px; }
+    .stat.verde-c .num { color:var(--verde); }
+    .stat.rojo-c  .num { color:var(--rojo); }
+    .stat.azul-c  .num { color:var(--azul); }
+    .stat.morado-c .num { color:var(--morado); }
+
+    /* Tabla */
+    .tabla-wrap { background:var(--blanco); border:1px solid var(--gris-bd); border-radius:12px; overflow:hidden; animation:fadeInUp 0.5s 0.2s ease both; }
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--negro); }
+    thead th { padding:0.85rem 1.2rem; font-family:'Barlow Condensed',sans-serif; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.7); text-align:left; }
+    tbody tr { border-bottom:1px solid var(--gris-bd); transition:background 0.15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--gris-bg); }
+    td { padding:0.8rem 1.2rem; font-size:0.88rem; vertical-align:middle; }
+
+    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:500; }
+    .badge-activo   { background:#e8f8f0; color:var(--verde-dk); }
+    .badge-devuelto { background:#f0f0ee; color:#555; }
+    .badge-novedad  { background:#fff0f0; color:var(--rojo); }
+    .badge-daño     { background:#fff3e0; color:var(--amarillo); }
+    .badge-perdida  { background:#fff0f0; color:var(--rojo); }
+    .badge-retraso  { background:#eaf4fb; color:var(--azul); }
+    .badge-otro     { background:var(--morado-lt); color:var(--morado); }
+
+    .btn-accion { padding:4px 10px; border-radius:6px; font-size:0.78rem; font-weight:500; cursor:pointer; border:1px solid; transition:background 0.15s,transform 0.1s; }
+    .btn-accion:active { transform:scale(0.95); }
+    .btn-devolver { border-color:#b8e0f5; background:var(--azul-lt); color:var(--azul); }
+    .btn-devolver:hover { background:#cdeaf7; }
+    .btn-reportar { border-color:#fbc8c8; background:#fff5f5; color:var(--rojo); }
+    .btn-reportar:hover { background:#ffe0e0; }
+    .sin-datos { text-align:center; padding:2.5rem; color:var(--gris-md); font-size:0.9rem; }
+
+    /* Formulario nuevo reporte */
+    .form-reporte { background:var(--blanco); border:1px solid var(--gris-bd); border-radius:12px; padding:2rem; animation:scaleIn 0.35s ease both; }
+    .form-reporte h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.4rem; font-weight:700; text-transform:uppercase; margin-bottom:1.5rem; color:var(--rojo); }
+    .campo { margin-bottom:1.1rem; }
+    .campo label { display:block; font-size:0.78rem; font-weight:500; text-transform:uppercase; letter-spacing:0.4px; color:#666; margin-bottom:5px; }
+    .campo select,.campo textarea,.campo input { width:100%; padding:0.75rem 0.9rem; border:1.5px solid var(--gris-bd); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
+    .campo select:focus,.campo textarea:focus,.campo input:focus { border-color:var(--rojo); }
+    .btn-enviar { padding:0.75rem 2rem; background:var(--rojo); color:var(--blanco); border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:1.05rem; font-weight:700; text-transform:uppercase; cursor:pointer; transition:background 0.2s,transform 0.1s; }
+    .btn-enviar:hover { background:#b02020; }
+    .btn-enviar:active { transform:scale(0.97); }
+
+    /* Modal */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0); z-index:200; align-items:center; justify-content:center; transition:background 0.25s; }
+    .modal-bg.abierto { display:flex; background:rgba(0,0,0,0.5); }
+    .modal { background:var(--blanco); border-radius:16px; padding:2rem; width:100%; max-width:460px; opacity:0; transform:scale(0.92) translateY(12px); transition:opacity 0.25s ease,transform 0.25s ease; }
+    .modal-bg.abierto .modal { opacity:1; transform:scale(1) translateY(0); }
+    .modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.4rem; font-weight:700; text-transform:uppercase; margin-bottom:1.5rem; color:var(--rojo); }
+    .modal-acciones { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem; }
+    .btn-cancelar { padding:0.65rem 1.2rem; border:1.5px solid var(--gris-bd); background:var(--blanco); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; cursor:pointer; transition:background 0.2s; }
+    .btn-cancelar:hover { background:var(--gris-bg); }
+
+    .toast { position:fixed; bottom:2rem; right:2rem; background:var(--negro); color:var(--blanco); padding:0.8rem 1.4rem; border-radius:10px; font-size:0.9rem; z-index:300; opacity:0; transform:translateY(16px); transition:opacity 0.3s,transform 0.3s; pointer-events:none; }
+    .toast.visible { opacity:1; transform:translateY(0); }
+    .toast.verde { border-left:4px solid #6ee4a6; }
+    .toast.rojo  { border-left:4px solid var(--rojo); }
+    .toast.azul  { border-left:4px solid var(--azul); }
+
+    @media(max-width:900px){ .stats{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){ main{padding:1rem;} .tabs{width:100%;} .tab{flex:1;text-align:center;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🏫 Bienestar <span>Universitario</span></div>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="inventario.html">Equipos</a>
+      <a href="reportes.html" class="activo">Reportes</a>
+    </div>
+    <span class="nav-usuario">Hola, <strong id="nav-nombre">—</strong></span>
+    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+  </div>
+</nav>
+
+<main>
+  <div class="tabs">
+    <button class="tab activo" onclick="cambiarTab('prestamos',this)">Préstamos activos</button>
+    <button class="tab" onclick="cambiarTab('historial',this)">Historial</button>
+    <button class="tab" onclick="cambiarTab('reportes',this)">Novedades</button>
+    <button class="tab" onclick="cambiarTab('nuevo-reporte',this)">+ Nueva novedad</button>
+  </div>
+
+  <!-- TAB: Préstamos activos -->
+  <div class="panel activo" id="panel-prestamos">
+    <div class="stats">
+      <div class="stat azul-c"><div class="num" id="r-activos">—</div><div class="lbl">Préstamos activos</div></div>
+      <div class="stat verde-c"><div class="num" id="r-devueltos">—</div><div class="lbl">Devueltos hoy</div></div>
+      <div class="stat rojo-c"><div class="num" id="r-novedades">—</div><div class="lbl">Con novedad</div></div>
+      <div class="stat morado-c"><div class="num" id="r-total">—</div><div class="lbl">Total préstamos</div></div>
+    </div>
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Equipo</th><th>Estudiante</th><th>Cantidad</th><th>Fecha préstamo</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-prestamos"><tr><td colspan="7" class="sin-datos">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Historial -->
+  <div class="panel" id="panel-historial">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Equipo</th><th>Estudiante</th><th>Cantidad</th><th>Fecha préstamo</th><th>Fecha devolución</th><th>Estado</th></tr></thead>
+        <tbody id="tbody-historial"><tr><td colspan="7" class="sin-datos">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Novedades/Reportes -->
+  <div class="panel" id="panel-reportes">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Equipo</th><th>Reportado por</th><th>Tipo</th><th>Descripción</th><th>Fecha</th></tr></thead>
+        <tbody id="tbody-reportes"><tr><td colspan="6" class="sin-datos">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Nueva novedad -->
+  <div class="panel" id="panel-nuevo-reporte">
+    <div class="form-reporte">
+      <h3>⚠ Reportar novedad</h3>
+      <div class="campo">
+        <label>Préstamo relacionado *</label>
+        <select id="r-prestamo">
+          <option value="">— Selecciona el préstamo —</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Tipo de novedad *</label>
+        <select id="r-tipo">
+          <option value="">— Selecciona el tipo —</option>
+          <option value="daño">Daño en el equipo</option>
+          <option value="perdida">Pérdida del equipo</option>
+          <option value="retraso">Retraso en la devolución</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Descripción detallada *</label>
+        <textarea id="r-descripcion" rows="4" placeholder="Describe con detalle qué ocurrió con el equipo..."></textarea>
+      </div>
+      <button class="btn-enviar" onclick="enviarReporte()">Enviar reporte</button>
+    </div>
+  </div>
+</main>
+
+<!-- Modal confirmar devolución -->
+<div class="modal-bg" id="modal-devolucion">
+  <div class="modal">
+    <h3 style="color:var(--azul)">✓ Confirmar devolución</h3>
+    <p style="font-size:0.95rem;color:#444;margin-bottom:0.5rem">¿Confirmas la devolución del préstamo?</p>
+    <div id="detalle-devolucion" style="background:var(--gris-bg);border-radius:8px;padding:0.9rem;margin-top:0.75rem;font-size:0.88rem;"></div>
+    <div class="modal-acciones">
+      <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-accion btn-devolver" style="padding:0.65rem 1.4rem;font-size:0.95rem" onclick="confirmarDevolucion()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:5000';
+  const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+  if (!usuario) { window.location.href = 'index.html'; }
+  document.getElementById('nav-nombre').textContent = usuario?.nombre || '';
+
+  let todosPrestamos = [];
+  let prestamoADevolver = null;
+
+  // ── Tabs ─────────────────────────────────────────────────
+  function cambiarTab(nombre, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('activo'));
+    btn.classList.add('activo');
+    document.getElementById(`panel-${nombre}`).classList.add('activo');
+    if (nombre === 'historial')     cargarHistorial();
+    if (nombre === 'reportes')      cargarReportes();
+    if (nombre === 'nuevo-reporte') cargarOpcionesPrestamo();
+  }
+
+  // ── Préstamos activos ─────────────────────────────────────
+  async function cargarPrestamos() {
+    try {
+      const res = await fetch(`${API}/api/prestamos`);
+      todosPrestamos = await res.json();
+
+      const activos   = todosPrestamos.filter(p => p.estado === 'activo');
+      const devueltos = todosPrestamos.filter(p => p.estado === 'devuelto');
+      const novedades = todosPrestamos.filter(p => p.estado === 'con_novedad');
+
+      document.getElementById('r-activos').textContent   = activos.length;
+      document.getElementById('r-devueltos').textContent = devueltos.length;
+      document.getElementById('r-novedades').textContent = novedades.length;
+      document.getElementById('r-total').textContent     = todosPrestamos.length;
+
+      const tbody = document.getElementById('tbody-prestamos');
+      const visibles = todosPrestamos.filter(p => p.estado === 'activo' || p.estado === 'con_novedad');
+      if (!visibles.length) { tbody.innerHTML = '<tr><td colspan="7" class="sin-datos">No hay préstamos activos</td></tr>'; return; }
+
+      tbody.innerHTML = visibles.map((p,i) => `
+        <tr>
+          <td style="color:var(--gris-md);font-size:0.78rem">${p.id}</td>
+          <td><strong>${p.equipo}</strong></td>
+          <td>${p.usuario}<br><span style="font-size:0.75rem;color:var(--gris-md)">${p.email}</span></td>
+          <td><strong>${p.cantidad}</strong> ud${p.cantidad>1?'s':''}</td>
+          <td style="font-size:0.82rem">${p.fecha_prestamo}</td>
+          <td><span class="badge badge-${p.estado==='con_novedad'?'novedad':'activo'}">${p.estado==='con_novedad'?'Con novedad':'Activo'}</span></td>
+          <td>
+            <div class="acciones" style="display:flex;gap:6px;">
+              <button class="btn-accion btn-devolver" onclick="abrirDevolucion(${p.id})">Devolver</button>
+              <button class="btn-accion btn-reportar" onclick="irAReporte(${p.id})">Reportar</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch(e) { mostrarToast('Error cargando préstamos','rojo'); }
+  }
+
+  // ── Historial completo ────────────────────────────────────
+  async function cargarHistorial() {
+    try {
+      const res = await fetch(`${API}/api/prestamos`);
+      const todos = await res.json();
+      const tbody = document.getElementById('tbody-historial');
+      if (!todos.length) { tbody.innerHTML = '<tr><td colspan="7" class="sin-datos">Sin historial</td></tr>'; return; }
+      tbody.innerHTML = todos.map(p => `
+        <tr>
+          <td style="color:var(--gris-md);font-size:0.78rem">${p.id}</td>
+          <td><strong>${p.equipo}</strong></td>
+          <td>${p.usuario}</td>
+          <td>${p.cantidad}</td>
+          <td style="font-size:0.82rem">${p.fecha_prestamo}</td>
+          <td style="font-size:0.82rem">${p.fecha_devolucion || '<span style="color:var(--gris-md)">Pendiente</span>'}</td>
+          <td><span class="badge badge-${p.estado==='devuelto'?'devuelto':p.estado==='con_novedad'?'novedad':'activo'}">${
+            p.estado==='devuelto'?'Devuelto':p.estado==='con_novedad'?'Con novedad':'Activo'
+          }</span></td>
+        </tr>
+      `).join('');
+    } catch(e) {}
+  }
+
+  // ── Reportes de novedades ─────────────────────────────────
+  async function cargarReportes() {
+    try {
+      const res = await fetch(`${API}/api/reportes`);
+      const reportes = await res.json();
+      const tbody = document.getElementById('tbody-reportes');
+      if (!reportes.length) { tbody.innerHTML = '<tr><td colspan="6" class="sin-datos">No hay novedades reportadas</td></tr>'; return; }
+      tbody.innerHTML = reportes.map(r => `
+        <tr>
+          <td style="color:var(--gris-md);font-size:0.78rem">${r.id}</td>
+          <td><strong>${r.equipo}</strong></td>
+          <td>${r.usuario}</td>
+          <td><span class="badge badge-${r.tipo}">${
+            r.tipo==='daño'?'Daño':r.tipo==='perdida'?'Pérdida':r.tipo==='retraso'?'Retraso':'Otro'
+          }</span></td>
+          <td style="max-width:260px;font-size:0.82rem">${r.descripcion}</td>
+          <td style="font-size:0.82rem">${r.fecha}</td>
+        </tr>
+      `).join('');
+    } catch(e) {}
+  }
+
+  // ── Opciones de préstamo en el formulario ─────────────────
+  async function cargarOpcionesPrestamo() {
+    try {
+      const res = await fetch(`${API}/api/prestamos`);
+      const todos = await res.json();
+      const activos = todos.filter(p => p.estado === 'activo' || p.estado === 'con_novedad');
+      const sel = document.getElementById('r-prestamo');
+      sel.innerHTML = '<option value="">— Selecciona el préstamo —</option>';
+      activos.forEach(p => {
+        sel.innerHTML += `<option value="${p.id}">#${p.id} · ${p.equipo} → ${p.usuario}</option>`;
+      });
+    } catch(e) {}
+  }
+
+  // ── Enviar reporte ────────────────────────────────────────
+  async function enviarReporte() {
+    const id_prestamo = document.getElementById('r-prestamo').value;
+    const tipo        = document.getElementById('r-tipo').value;
+    const descripcion = document.getElementById('r-descripcion').value.trim();
+    if (!id_prestamo || !tipo || !descripcion) {
+      mostrarToast('Completa todos los campos','rojo'); return;
+    }
+    try {
+      const res = await fetch(`${API}/api/reportes`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id_prestamo: parseInt(id_prestamo), id_usuario: usuario.id, tipo, descripcion })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        mostrarToast('Reporte enviado correctamente ✓','verde');
+        document.getElementById('r-prestamo').value    = '';
+        document.getElementById('r-tipo').value        = '';
+        document.getElementById('r-descripcion').value = '';
+        cargarPrestamos();
+      } else mostrarToast(data.error||'Error al enviar','rojo');
+    } catch(e) { mostrarToast('Error de conexión','rojo'); }
+  }
+
+  // ── Devolución ────────────────────────────────────────────
+  function abrirDevolucion(id) {
+    prestamoADevolver = todosPrestamos.find(p => p.id === id);
+    if (!prestamoADevolver) return;
+    document.getElementById('detalle-devolucion').innerHTML = `
+      <strong>${prestamoADevolver.equipo}</strong><br>
+      Estudiante: ${prestamoADevolver.usuario} · Cantidad: ${prestamoADevolver.cantidad} ud${prestamoADevolver.cantidad>1?'s':''}
+    `;
+    const bg = document.getElementById('modal-devolucion');
+    bg.style.display = 'flex';
+    requestAnimationFrame(() => bg.classList.add('abierto'));
+  }
+
+  async function confirmarDevolucion() {
+    if (!prestamoADevolver) return;
+    try {
+      const res = await fetch(`${API}/api/prestamos/${prestamoADevolver.id}/devolver`, { method:'PUT' });
+      const data = await res.json();
+      if (res.ok) {
+        mostrarToast('Devolución registrada ✓','verde');
+        cerrarModal(); cargarPrestamos();
+      } else mostrarToast(data.error||'Error','rojo');
+    } catch(e) { mostrarToast('Error de conexión','rojo'); }
+  }
+
+  function irAReporte(id) {
+    cargarOpcionesPrestamo().then(() => {
+      document.getElementById('r-prestamo').value = id;
+      const tabBtn = document.querySelectorAll('.tab')[3];
+      cambiarTab('nuevo-reporte', tabBtn);
+    });
+  }
+
+  function cerrarModal() {
+    const bg = document.getElementById('modal-devolucion');
+    bg.classList.remove('abierto');
+    setTimeout(() => bg.style.display='none', 260);
+    prestamoADevolver = null;
+  }
+
+  document.getElementById('modal-devolucion').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  async function cerrarSesion() {
+    await fetch(`${API}/api/logout`, { method:'POST', credentials:'include' });
+    localStorage.removeItem('usuario');
+    window.location.href = 'index.html';
+  }
+
+  function mostrarToast(msg, tipo='verde') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${tipo} visible`;
+    setTimeout(() => t.classList.remove('visible'), 3200);
+  }
+
+  cargarPrestamos();
+</script>
+</body>
+</html>

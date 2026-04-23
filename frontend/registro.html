@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro — Tienda Deportiva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde:    #1a8c4e;
+      --verde-dk: #0f5c33;
+      --verde-lt: #d4f0e2;
+      --negro:    #0d0d0d;
+      --gris:     #f4f4f2;
+      --gris-bd:  #e2e2da;
+      --gris-md:  #b0b0a8;
+      --blanco:   #ffffff;
+      --rojo:     #d63031;
+    }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--negro);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── Panel izquierdo decorativo ── */
+    .panel-izq {
+      background: var(--verde-dk);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+      gap: 2rem;
+    }
+    .panel-izq::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.05);
+      bottom: -120px; right: -120px;
+    }
+    .panel-izq::after {
+      content: '';
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      border: 28px solid rgba(255,255,255,0.07);
+      top: 40px; left: -50px;
+    }
+
+    .logo-area { z-index: 1; }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: var(--blanco);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 1.5rem;
+    }
+    .logo-area h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--blanco);
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+    .logo-area h1 span { color: #6ee4a6; }
+    .logo-area p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      margin-top: 0.6rem;
+    }
+
+    .pasos { z-index: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .paso {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .paso-num {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #6ee4a6;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .paso-txt strong {
+      display: block;
+      color: var(--blanco);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .paso-txt span {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* ── Panel derecho ── */
+    .panel-der {
+      background: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2.5rem;
+      overflow-y: auto;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .form-box h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--negro);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .subtitulo {
+      font-size: 0.9rem;
+      color: var(--gris-md);
+      margin-bottom: 2rem;
+    }
+
+    .campo {
+      margin-bottom: 1.1rem;
+    }
+    .campo label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .campo input,
+    .campo select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1.5px solid var(--gris-bd);
+      border-radius: 10px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.95rem;
+      color: var(--negro);
+      background: var(--gris);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .campo input:focus,
+    .campo select:focus {
+      border-color: var(--verde);
+      background: var(--blanco);
+    }
+    .campo input.error { border-color: var(--rojo); }
+
+    /* Indicador de fuerza de contraseña */
+    .fuerza-wrap { margin-top: 6px; }
+    .fuerza-barras {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    .fuerza-barras span {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--gris-bd);
+      transition: background 0.3s;
+    }
+    .fuerza-label {
+      font-size: 0.75rem;
+      color: var(--gris-md);
+    }
+
+    .fila-dos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Mensaje de error/éxito */
+    .alerta {
+      display: none;
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+    .alerta.visible { display: block; }
+    .alerta.error   { background: #fff0f0; border: 1px solid #fbc8c8; color: var(--rojo); }
+    .alerta.exito   { background: #f0fff6; border: 1px solid #a8e6c3; color: var(--verde-dk); }
+
+    .btn-registrar {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--verde);
+      color: var(--blanco);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 1.2rem;
+    }
+    .btn-registrar:hover   { background: var(--verde-dk); }
+    .btn-registrar:active  { transform: scale(0.98); }
+    .btn-registrar:disabled { background: var(--gris-md); cursor: not-allowed; }
+
+    .ir-login {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--gris-md);
+    }
+    .ir-login a {
+      color: var(--verde);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .ir-login a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      body { grid-template-columns: 1fr; }
+      .panel-izq { display: none; }
+      .panel-der { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Panel izquierdo -->
+  <div class="panel-izq">
+    <div class="logo-area">
+      <div class="logo-icon">⚽</div>
+      <h1>Crea tu<br><span>Cuenta</span></h1>
+      <p>Tienda Deportiva — Universidad</p>
+    </div>
+
+    <div class="pasos">
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-txt">
+          <strong>Completa el formulario</strong>
+          <span>Nombre, correo y contraseña segura</span>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-txt">
+          <strong>Tu cuenta queda guardada</strong>
+          <span>Se almacena en la base de datos MySQL</span>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div class="paso-txt">
+          <strong>Inicia sesión</strong>
+          <span>Accede al inventario con tus credenciales</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="panel-der">
+    <div class="form-box">
+      <h2>Registro</h2>
+      <p class="subtitulo">Crea tu cuenta para acceder al sistema</p>
+
+      <div class="alerta" id="alerta"></div>
+
+      <div class="campo">
+        <label for="nombre">Nombre completo *</label>
+        <input type="text" id="nombre" placeholder="Ej: Carlos Pérez" autocomplete="name">
+      </div>
+
+      <div class="campo">
+        <label for="email">Correo electrónico *</label>
+        <input type="email" id="email" placeholder="correo@universidad.edu.co" autocomplete="email">
+      </div>
+
+      <div class="fila-dos">
+        <div class="campo">
+          <label for="password">Contraseña *</label>
+          <input type="password" id="password" placeholder="Mínimo 6 caracteres" oninput="medirFuerza(this.value)">
+          <div class="fuerza-wrap">
+            <div class="fuerza-barras">
+              <span id="b1"></span>
+              <span id="b2"></span>
+              <span id="b3"></span>
+              <span id="b4"></span>
+            </div>
+            <span class="fuerza-label" id="fuerza-label">—</span>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="confirmar">Confirmar *</label>
+          <input type="password" id="confirmar" placeholder="Repite la contraseña">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="rol">Tipo de usuario</label>
+        <select id="rol">
+          <option value="2">Usuario estándar</option>
+          <option value="1">Administrador</option>
+        </select>
+      </div>
+
+      <button class="btn-registrar" id="btn-reg" onclick="registrar()">
+        Crear cuenta
+      </button>
+
+      <p class="ir-login">
+        ¿Ya tienes cuenta? <a href="index.html">Inicia sesión aquí</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000';
+
+    // ── Indicador de fuerza de contraseña ────────────────
+    function medirFuerza(val) {
+      const barras = [
+        document.getElementById('b1'),
+        document.getElementById('b2'),
+        document.getElementById('b3'),
+        document.getElementById('b4')
+      ];
+      const label = document.getElementById('fuerza-label');
+
+      // Resetear
+      barras.forEach(b => b.style.background = 'var(--gris-bd)');
+
+      if (!val) { label.textContent = '—'; return; }
+
+      let puntos = 0;
+      if (val.length >= 6)                        puntos++;
+      if (val.length >= 10)                       puntos++;
+      if (/[A-Z]/.test(val) && /[0-9]/.test(val)) puntos++;
+      if (/[^A-Za-z0-9]/.test(val))              puntos++;
+
+      const colores = ['#d63031', '#f39c12', '#1a8c4e', '#1a8c4e'];
+      const textos  = ['Muy débil', 'Regular', 'Buena', 'Muy fuerte'];
+
+      for (let i = 0; i < puntos; i++) {
+        barras[i].style.background = colores[puntos - 1];
+      }
+      label.textContent = textos[puntos - 1] || '—';
+      label.style.color = colores[puntos - 1] || 'var(--gris-md)';
+    }
+
+    // ── Registro ─────────────────────────────────────────
+    async function registrar() {
+      const nombre    = document.getElementById('nombre').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const password  = document.getElementById('password').value;
+      const confirmar = document.getElementById('confirmar').value;
+      const id_rol    = document.getElementById('rol').value;
+      const btn       = document.getElementById('btn-reg');
+
+      // Limpiar errores previos
+      mostrarAlerta('', '');
+      document.querySelectorAll('input').forEach(i => i.classList.remove('error'));
+
+      // Validaciones en el frontend
+      if (!nombre) {
+        return mostrarAlerta('El nombre es obligatorio.', 'error');
+      }
+      if (!email || !email.includes('@')) {
+        document.getElementById('email').classList.add('error');
+        return mostrarAlerta('Ingresa un correo válido.', 'error');
+      }
+      if (password.length < 6) {
+        document.getElementById('password').classList.add('error');
+        return mostrarAlerta('La contraseña debe tener al menos 6 caracteres.', 'error');
+      }
+      if (password !== confirmar) {
+        document.getElementById('confirmar').classList.add('error');
+        return mostrarAlerta('Las contraseñas no coinciden.', 'error');
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Creando cuenta...';
+
+      try {
+        const res = await fetch(`${API}/api/registro`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, email, password, id_rol: parseInt(id_rol) })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          mostrarAlerta('✓ Cuenta creada exitosamente. Redirigiendo al login...', 'exito');
+          setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+        } else {
+          mostrarAlerta(data.error || 'Error al crear la cuenta.', 'error');
+          btn.disabled    = false;
+          btn.textContent = 'Crear cuenta';
+        }
+      } catch (e) {
+        mostrarAlerta('No se pudo conectar al servidor. Verifica que Flask esté corriendo.', 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Crear cuenta';
+      }
+    }
+
+    function mostrarAlerta(msg, tipo) {
+      const el = document.getElementById('alerta');
+      if (!msg) { el.classList.remove('visible'); return; }
+      el.textContent = msg;
+      el.className   = `alerta visible ${tipo}`;
+    }
+
+    // Enter para registrar
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') registrar();
+    });
+  </script>
+</body>
+</html>

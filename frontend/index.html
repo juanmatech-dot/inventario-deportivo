@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda Deportiva — Acceso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde:    #1a8c4e;
+      --verde-dk: #0f5c33;
+      --verde-lt: #d4f0e2;
+      --negro:    #0d0d0d;
+      --gris:     #f4f4f2;
+      --gris-md:  #b0b0a8;
+      --blanco:   #ffffff;
+      --rojo:     #d63031;
+    }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--negro);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Panel izquierdo */
+    .panel-izq {
+      background: var(--verde-dk);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel-izq::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.05);
+      bottom: -100px; left: -100px;
+    }
+    .panel-izq::after {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      border: 30px solid rgba(255,255,255,0.07);
+      top: 60px; right: -40px;
+    }
+    .logo-area { z-index: 1; }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: var(--blanco);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 1.5rem;
+    }
+    .logo-area h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--blanco);
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+    .logo-area h1 span { color: #6ee4a6; }
+    .logo-area p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.95rem;
+      margin-top: 0.75rem;
+    }
+    .stats-area {
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 1.1rem;
+    }
+    .stat-card .num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #6ee4a6;
+    }
+    .stat-card .lbl {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+    }
+
+    /* Panel derecho */
+    .panel-der {
+      background: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2.5rem;
+    }
+    .form-box {
+      width: 100%;
+      max-width: 380px;
+    }
+    .form-box h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--negro);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .form-box .subtitulo {
+      font-size: 0.9rem;
+      color: var(--gris-md);
+      margin-bottom: 2.5rem;
+    }
+    .campo { margin-bottom: 1.25rem; }
+    .campo label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .campo input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1.5px solid #e0e0d8;
+      border-radius: 10px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.95rem;
+      color: var(--negro);
+      background: var(--gris);
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+    }
+    .campo input:focus {
+      border-color: var(--verde);
+      background: var(--blanco);
+    }
+    .error-msg {
+      display: none;
+      background: #fff0f0;
+      border: 1px solid #fbc8c8;
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      color: var(--rojo);
+      margin-bottom: 1.25rem;
+    }
+    .error-msg.visible { display: block; }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--verde);
+      color: var(--blanco);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 1.25rem;
+    }
+    .btn-login:hover  { background: var(--verde-dk); }
+    .btn-login:active { transform: scale(0.98); }
+    .btn-login:disabled { background: var(--gris-md); cursor: not-allowed; }
+
+    /* Separador */
+    .separador {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .separador::before,
+    .separador::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e0e0d8;
+    }
+    .separador span {
+      font-size: 0.8rem;
+      color: var(--gris-md);
+      white-space: nowrap;
+    }
+
+    /* Botón de registro */
+    .btn-registro {
+      display: block;
+      width: 100%;
+      padding: 0.85rem;
+      background: transparent;
+      color: var(--verde-dk);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1.5px solid var(--verde);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .btn-registro:hover {
+      background: var(--verde-lt);
+    }
+
+    .pie {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--gris-md);
+    }
+
+    @media (max-width: 700px) {
+      body { grid-template-columns: 1fr; }
+      .panel-izq { display: none; }
+      .panel-der { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Panel izquierdo -->
+  <div class="panel-izq">
+    <div class="logo-area">
+      <div class="logo-icon">⚽</div>
+      <h1>Tienda<br><span>Deportiva</span></h1>
+      <p>Universidad — Sistema de inventario FET</p>
+    </div>
+    <div class="stats-area">
+      <div class="stat-card">
+        <div class="num" id="stat-productos">—</div>
+        <div class="lbl">Productos</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="stat-categorias">6</div>
+        <div class="lbl">Categorías</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="stat-alertas">—</div>
+        <div class="lbl">Alertas stock</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">2026</div>
+        <div class="lbl">Año escolar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="panel-der">
+    <div class="form-box">
+      <h2>Bienvenido</h2>
+      <p class="subtitulo">Ingresa tus credenciales para continuar</p>
+
+      <div class="error-msg" id="error-msg">
+        Correo o contraseña incorrectos. Intenta de nuevo.
+      </div>
+
+      <div class="campo">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" placeholder="usuario@universidad.edu.co" autocomplete="email">
+      </div>
+
+      <div class="campo">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="iniciarSesion()">
+        Ingresar
+      </button>
+
+      <div class="separador">
+        <span>¿No tienes cuenta?</span>
+      </div>
+
+      <a href="registro.html" class="btn-registro">
+        Crear cuenta nueva
+      </a>
+
+      <p class="pie">Proyecto de aula · Ingeniería de Software</p>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000';
+
+    async function cargarStats() {
+      try {
+        const res = await fetch(`${API}/api/productos`);
+        const productos = await res.json();
+        document.getElementById('stat-productos').textContent = productos.length;
+
+        const res2 = await fetch(`${API}/api/productos/stock-bajo`);
+        const alertas = await res2.json();
+        document.getElementById('stat-alertas').textContent = alertas.length;
+      } catch (e) {}
+    }
+
+    async function iniciarSesion() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('btn-login');
+      const errorMsg = document.getElementById('error-msg');
+
+      if (!email || !password) {
+        errorMsg.textContent = 'Por favor completa todos los campos.';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Verificando...';
+      errorMsg.classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('usuario', JSON.stringify(data.usuario));
+          window.location.href = 'inventario.html';
+        } else {
+          errorMsg.textContent = data.error || 'Credenciales incorrectas.';
+          errorMsg.classList.add('visible');
+          btn.disabled    = false;
+          btn.textContent = 'Ingresar';
+        }
+      } catch (e) {
+        errorMsg.textContent = 'No se pudo conectar al servidor. Verifica que Flask esté corriendo.';
+        errorMsg.classList.add('visible');
+        btn.disabled    = false;
+        btn.textContent = 'Ingresar';
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    cargarStats();
+  </script>
+</body>
+</html>

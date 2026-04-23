@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipos Disponibles — Bienestar Universitario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --verde: #1a8c4e; --verde-dk: #0f5c33; --verde-lt: #e8f8f0;
+      --negro: #0d0d0d; --gris-bg: #f6f6f4; --gris-bd: #e2e2da;
+      --gris-md: #888880; --blanco: #ffffff;
+      --rojo: #d63031; --amarillo: #f39c12; --azul: #2980b9; --azul-lt: #eaf4fb;
+    }
+
+    /* ── Animaciones generales ── */
+    @keyframes fadeInDown {
+      from { opacity:0; transform:translateY(-18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity:0; } to { opacity:1; }
+    }
+    @keyframes slideInRight {
+      from { opacity:0; transform:translateX(40px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity:0; transform:scale(0.93); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+
+    body { font-family:'Barlow',sans-serif; background:var(--gris-bg); color:var(--negro); min-height:100vh; }
+
+    /* Navbar */
+    nav {
+      background:var(--negro);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 2rem; height:60px;
+      position:sticky; top:0; z-index:100;
+      animation: fadeInDown 0.5s ease both;
+    }
+    .nav-brand { font-family:'Barlow Condensed',sans-serif; font-size:1.3rem; font-weight:800; color:var(--blanco); text-transform:uppercase; letter-spacing:1px; }
+    .nav-brand span { color:#6ee4a6; }
+    .nav-right { display:flex; align-items:center; gap:1rem; }
+    .nav-links a { color:rgba(255,255,255,0.65); font-size:0.85rem; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; transition:background 0.2s, color 0.2s; }
+    .nav-links a:hover { background:rgba(255,255,255,0.1); color:var(--blanco); }
+    .nav-links a.activo { color:#6ee4a6; }
+    .nav-usuario { font-size:0.85rem; color:rgba(255,255,255,0.55); }
+    .nav-usuario strong { color:var(--blanco); }
+    .btn-logout { padding:0.4rem 1rem; border:1px solid rgba(255,255,255,0.2); background:transparent; color:rgba(255,255,255,0.7); border-radius:6px; font-size:0.8rem; cursor:pointer; transition:background 0.2s; }
+    .btn-logout:hover { background:rgba(255,255,255,0.1); }
+
+    main { padding:2rem; max-width:1200px; margin:0 auto; }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat {
+      background:var(--blanco); border:1px solid var(--gris-bd);
+      border-radius:12px; padding:1.2rem 1.4rem;
+      animation: fadeInUp 0.5s ease both;
+    }
+    .stat:nth-child(1){animation-delay:0.1s}
+    .stat:nth-child(2){animation-delay:0.15s}
+    .stat:nth-child(3){animation-delay:0.2s}
+    .stat:nth-child(4){animation-delay:0.25s}
+    .stat .num { font-family:'Barlow Condensed',sans-serif; font-size:2.2rem; font-weight:700; line-height:1; }
+    .stat .lbl { font-size:0.8rem; color:var(--gris-md); margin-top:4px; }
+    .stat.alerta .num { color:var(--rojo); }
+    .stat.ok .num { color:var(--verde); }
+
+    /* Toolbar */
+    .toolbar { display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; animation: fadeInUp 0.5s 0.3s ease both; }
+    .toolbar h2 { font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:700; text-transform:uppercase; flex:1; }
+    .buscador { padding:0.6rem 1rem; border:1.5px solid var(--gris-bd); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; width:220px; background:var(--blanco); outline:none; transition:border-color 0.2s; }
+    .buscador:focus { border-color:var(--verde); }
+    select.filtro { padding:0.6rem 1rem; border:1.5px solid var(--gris-bd); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; background:var(--blanco); outline:none; cursor:pointer; }
+    .btn-nuevo { padding:0.65rem 1.4rem; background:var(--verde); color:var(--blanco); border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; transition:background 0.2s, transform 0.1s; white-space:nowrap; }
+    .btn-nuevo:hover { background:var(--verde-dk); transform:translateY(-1px); }
+
+    /* Tabla */
+    .tabla-wrap { background:var(--blanco); border:1px solid var(--gris-bd); border-radius:12px; overflow:hidden; animation: fadeInUp 0.5s 0.35s ease both; }
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--negro); }
+    thead th { padding:0.9rem 1.2rem; font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.7); text-align:left; }
+    tbody tr { border-bottom:1px solid var(--gris-bd); transition:background 0.15s, transform 0.15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--gris-bg); }
+    td { padding:0.85rem 1.2rem; font-size:0.9rem; vertical-align:middle; }
+
+    /* Skeleton loader */
+    .skeleton { background:linear-gradient(90deg,#f0f0ee 25%,#e0e0dc 50%,#f0f0ee 75%); background-size:600px 100%; animation:shimmer 1.4s infinite; border-radius:6px; height:14px; }
+
+    .badge-cat { display:inline-block; padding:3px 10px; background:var(--verde-lt); color:var(--verde-dk); border-radius:20px; font-size:0.78rem; font-weight:500; }
+    .badge-alerta { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff3e0; color:var(--amarillo); border-radius:20px; font-size:0.78rem; font-weight:500; }
+    .badge-ok { display:inline-block; padding:3px 10px; background:var(--verde-lt); color:var(--verde); border-radius:20px; font-size:0.78rem; font-weight:500; }
+    .badge-novedad { display:inline-block; padding:3px 10px; background:#fff0f0; color:var(--rojo); border-radius:20px; font-size:0.78rem; font-weight:500; }
+
+    .acciones { display:flex; gap:6px; }
+    .btn-accion { padding:5px 12px; border-radius:6px; font-size:0.8rem; font-weight:500; cursor:pointer; border:1px solid; transition:background 0.15s, transform 0.1s; }
+    .btn-accion:active { transform:scale(0.96); }
+    .btn-edit  { border-color:var(--gris-bd); background:var(--blanco); color:#444; }
+    .btn-edit:hover  { background:var(--gris-bg); }
+    .btn-del   { border-color:#fbc8c8; background:#fff5f5; color:var(--rojo); }
+    .btn-del:hover   { background:#ffe0e0; }
+    .btn-pedir { border-color:#b8e0f5; background:var(--azul-lt); color:var(--azul); }
+    .btn-pedir:hover { background:#cdeaf7; }
+    .sin-datos { text-align:center; padding:3rem; color:var(--gris-md); font-size:0.95rem; }
+
+    /* ── Modal base ── */
+    .modal-bg {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0); z-index:200;
+      align-items:center; justify-content:center;
+      transition:background 0.25s;
+    }
+    .modal-bg.abierto {
+      display:flex;
+      background:rgba(0,0,0,0.5);
+    }
+    .modal {
+      background:var(--blanco); border-radius:16px; padding:2rem;
+      width:100%; max-width:480px; max-height:90vh; overflow-y:auto;
+      opacity:0; transform:scale(0.92) translateY(12px);
+      transition:opacity 0.25s ease, transform 0.25s ease;
+    }
+    .modal-bg.abierto .modal {
+      opacity:1; transform:scale(1) translateY(0);
+    }
+    .modal h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.5rem; font-weight:700; text-transform:uppercase; margin-bottom:1.5rem; }
+    .campo-modal { margin-bottom:1.1rem; }
+    .campo-modal label { display:block; font-size:0.78rem; font-weight:500; text-transform:uppercase; letter-spacing:0.4px; color:#666; margin-bottom:5px; }
+    .campo-modal input,.campo-modal select,.campo-modal textarea { width:100%; padding:0.7rem 0.9rem; border:1.5px solid var(--gris-bd); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
+    .campo-modal input:focus,.campo-modal select:focus,.campo-modal textarea:focus { border-color:var(--verde); }
+    .modal-fila { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .modal-acciones { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem; }
+    .btn-cancelar { padding:0.65rem 1.2rem; border:1.5px solid var(--gris-bd); background:var(--blanco); border-radius:8px; font-family:'Barlow',sans-serif; font-size:0.9rem; cursor:pointer; transition:background 0.2s; }
+    .btn-cancelar:hover { background:var(--gris-bg); }
+    .btn-guardar { padding:0.65rem 1.4rem; background:var(--verde); color:var(--blanco); border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; text-transform:uppercase; cursor:pointer; transition:background 0.2s, transform 0.1s; }
+    .btn-guardar:hover { background:var(--verde-dk); }
+    .btn-guardar:active { transform:scale(0.97); }
+
+    /* Modal préstamo */
+    .detalle-equipo { background:var(--gris-bg); border-radius:10px; padding:1rem; margin-bottom:1.2rem; }
+    .detalle-equipo strong { display:block; font-size:1rem; margin-bottom:4px; }
+    .detalle-equipo span { font-size:0.82rem; color:var(--gris-md); }
+    .btn-confirmar-prestamo { padding:0.65rem 1.4rem; background:var(--azul); color:var(--blanco); border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; text-transform:uppercase; cursor:pointer; transition:background 0.2s, transform 0.1s; }
+    .btn-confirmar-prestamo:hover { background:#1f6fa0; }
+    .btn-confirmar-prestamo:active { transform:scale(0.97); }
+
+    /* Toast */
+    .toast { position:fixed; bottom:2rem; right:2rem; background:var(--negro); color:var(--blanco); padding:0.8rem 1.4rem; border-radius:10px; font-size:0.9rem; z-index:300; opacity:0; transform:translateY(16px); transition:opacity 0.3s, transform 0.3s; pointer-events:none; }
+    .toast.visible { opacity:1; transform:translateY(0); }
+    .toast.verde { border-left:4px solid #6ee4a6; }
+    .toast.rojo  { border-left:4px solid var(--rojo); }
+    .toast.azul  { border-left:4px solid var(--azul); }
+
+    @media(max-width:900px){ .stats{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){ main{padding:1rem;} .toolbar{flex-direction:column;align-items:stretch;} .buscador{width:100%;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🏫 Bienestar <span>Universitario</span></div>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="inventario.html" class="activo">Equipos</a>
+      <a href="reportes.html">Reportes</a>
+    </div>
+    <span class="nav-usuario">Hola, <strong id="nav-nombre">—</strong></span>
+    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+  </div>
+</nav>
+
+<main>
+  <div class="stats">
+    <div class="stat ok"><div class="num" id="s-total">—</div><div class="lbl">Equipos registrados</div></div>
+    <div class="stat"><div class="num" id="s-disponibles">—</div><div class="lbl">Disponibles ahora</div></div>
+    <div class="stat"><div class="num" id="s-prestados">—</div><div class="lbl">En préstamo</div></div>
+    <div class="stat alerta"><div class="num" id="s-alertas">—</div><div class="lbl">⚠ Stock bajo</div></div>
+  </div>
+
+  <div class="toolbar">
+    <h2>Equipos disponibles</h2>
+    <input class="buscador" type="text" id="buscador" placeholder="Buscar equipo..." oninput="filtrar()">
+    <select class="filtro" id="filtro-cat" onchange="filtrar()">
+      <option value="">Todas las categorías</option>
+    </select>
+    <button class="btn-nuevo" id="btn-nuevo" onclick="abrirModalNuevo()">+ Registrar equipo</button>
+  </div>
+
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Nombre</th><th>Categoría</th>
+          <th>Disponibles</th><th>Total</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="7"><div style="padding:1.5rem 1.2rem;display:flex;flex-direction:column;gap:10px">
+          <div class="skeleton" style="width:70%"></div>
+          <div class="skeleton" style="width:55%"></div>
+          <div class="skeleton" style="width:65%"></div>
+        </div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Modal registrar / editar equipo -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-titulo">Registrar equipo</h3>
+    <input type="hidden" id="eq-id">
+    <div class="campo-modal"><label>Nombre *</label><input type="text" id="eq-nombre" placeholder="Ej: Balón de fútbol N5"></div>
+    <div class="campo-modal"><label>Descripción</label><textarea id="eq-desc" rows="2" placeholder="Descripción breve..."></textarea></div>
+    <div class="campo-modal"><label>Categoría *</label><select id="eq-cat"></select></div>
+    <div class="modal-fila">
+      <div class="campo-modal"><label>Cantidad total *</label><input type="number" id="eq-stock" min="1" placeholder="10"></div>
+      <div class="campo-modal"><label>Stock mínimo alerta</label><input type="number" id="eq-min" min="1" placeholder="2"></div>
+    </div>
+    <div class="modal-acciones">
+      <button class="btn-cancelar" onclick="cerrarModal('modal-bg')">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarEquipo()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pedir prestado -->
+<div class="modal-bg" id="modal-prestamo-bg">
+  <div class="modal" style="max-width:400px">
+    <h3 style="color:var(--azul)">📋 Solicitar préstamo</h3>
+    <div class="detalle-equipo" id="detalle-equipo"></div>
+    <div class="campo-modal"><label>Cantidad que necesitas *</label><input type="number" id="p-cantidad" min="1" value="1"></div>
+    <div class="modal-acciones">
+      <button class="btn-cancelar" onclick="cerrarModal('modal-prestamo-bg')">Cancelar</button>
+      <button class="btn-confirmar-prestamo" onclick="confirmarPrestamo()">Confirmar préstamo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:5000';
+  const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+  if (!usuario) { window.location.href = 'index.html'; }
+  document.getElementById('nav-nombre').textContent = usuario?.nombre || '';
+
+  let todosLosEquipos = [];
+  let categorias = [];
+  let equipoSeleccionado = null;
+
+  async function cargarTodo() {
+    await Promise.all([cargarEquipos(), cargarCategorias(), cargarAlertas()]);
+  }
+
+  async function cargarEquipos() {
+    try {
+      const res = await fetch(`${API}/api/equipos`);
+      todosLosEquipos = await res.json();
+      renderTabla(todosLosEquipos);
+      document.getElementById('s-total').textContent = todosLosEquipos.length;
+      const disp = todosLosEquipos.reduce((a,e) => a + e.stock_disponible, 0);
+      const prest = todosLosEquipos.reduce((a,e) => a + (e.stock_total - e.stock_disponible), 0);
+      document.getElementById('s-disponibles').textContent = disp;
+      document.getElementById('s-prestados').textContent   = prest;
+    } catch(e) { mostrarToast('Error conectando al servidor','rojo'); }
+  }
+
+  async function cargarCategorias() {
+    try {
+      const res = await fetch(`${API}/api/categorias`);
+      categorias = await res.json();
+      const filtro = document.getElementById('filtro-cat');
+      filtro.innerHTML = '<option value="">Todas las categorías</option>';
+      categorias.forEach(c => filtro.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`);
+      const sel = document.getElementById('eq-cat');
+      sel.innerHTML = '';
+      categorias.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+    } catch(e) {}
+  }
+
+  async function cargarAlertas() {
+    try {
+      const res = await fetch(`${API}/api/equipos/stock-bajo`);
+      const alertas = await res.json();
+      document.getElementById('s-alertas').textContent = alertas.length;
+    } catch(e) {}
+  }
+
+  function renderTabla(equipos) {
+    const tbody = document.getElementById('tabla-body');
+    if (!equipos.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="sin-datos">No se encontraron equipos</td></tr>';
+      return;
+    }
+    tbody.innerHTML = equipos.map((e,i) => `
+      <tr>
+        <td style="color:var(--gris-md);font-size:0.8rem">${i+1}</td>
+        <td><strong>${e.nombre}</strong>${e.descripcion?`<br><span style="font-size:0.78rem;color:var(--gris-md)">${e.descripcion}</span>`:''}</td>
+        <td><span class="badge-cat">${e.categoria}</span></td>
+        <td><strong style="font-size:1.05rem">${e.stock_disponible}</strong><span style="color:var(--gris-md);font-size:0.78rem"> uds.</span></td>
+        <td style="color:var(--gris-md)">${e.stock_total}</td>
+        <td>${e.stock_disponible === 0
+          ? `<span class="badge-novedad">Sin stock</span>`
+          : e.stock_disponible <= e.stock_minimo
+            ? `<span class="badge-alerta">⚠ Bajo</span>`
+            : `<span class="badge-ok">✓ Disponible</span>`}
+        </td>
+        <td>
+          <div class="acciones">
+            <button class="btn-accion btn-pedir" onclick="abrirModalPrestamo(${e.id})" ${e.stock_disponible===0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Pedir prestado</button>
+            <button class="btn-accion btn-edit" onclick="abrirModalEditar(${e.id})">Editar</button>
+            <button class="btn-accion btn-del"  onclick="eliminarEquipo(${e.id},'${e.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filtrar() {
+    const txt = document.getElementById('buscador').value.toLowerCase();
+    const cat = document.getElementById('filtro-cat').value;
+    renderTabla(todosLosEquipos.filter(e =>
+      (e.nombre.toLowerCase().includes(txt) || (e.descripcion||'').toLowerCase().includes(txt)) &&
+      (!cat || e.categoria === cat)
+    ));
+  }
+
+  // Modal equipo
+  function abrirModalNuevo() {
+    document.getElementById('modal-titulo').textContent = 'Registrar equipo';
+    ['eq-id','eq-nombre','eq-desc','eq-stock'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('eq-min').value = '2';
+    abrirModal('modal-bg');
+  }
+
+  function abrirModalEditar(id) {
+    const e = todosLosEquipos.find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('modal-titulo').textContent = 'Editar equipo';
+    document.getElementById('eq-id').value    = e.id;
+    document.getElementById('eq-nombre').value = e.nombre;
+    document.getElementById('eq-desc').value   = e.descripcion || '';
+    document.getElementById('eq-stock').value  = e.stock_total;
+    document.getElementById('eq-min').value    = e.stock_minimo;
+    const cat = categorias.find(c => c.nombre === e.categoria);
+    if (cat) document.getElementById('eq-cat').value = cat.id;
+    abrirModal('modal-bg');
+  }
+
+  async function guardarEquipo() {
+    const id     = document.getElementById('eq-id').value;
+    const nombre = document.getElementById('eq-nombre').value.trim();
+    const stock  = document.getElementById('eq-stock').value;
+    const id_cat = document.getElementById('eq-cat').value;
+    if (!nombre || !stock || !id_cat) { mostrarToast('Completa los campos obligatorios','rojo'); return; }
+    const body = { nombre, descripcion: document.getElementById('eq-desc').value,
+                   stock_total: parseInt(stock), stock_minimo: parseInt(document.getElementById('eq-min').value)||2,
+                   id_categoria: parseInt(id_cat) };
+    try {
+      const url = id ? `${API}/api/equipos/${id}` : `${API}/api/equipos`;
+      const res = await fetch(url, { method: id?'PUT':'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      const data = await res.json();
+      if (res.ok) { mostrarToast(id?'Equipo actualizado ✓':'Equipo registrado ✓','verde'); cerrarModal('modal-bg'); cargarTodo(); }
+      else mostrarToast(data.error||'Error al guardar','rojo');
+    } catch(e) { mostrarToast('Error de conexión','rojo'); }
+  }
+
+  async function eliminarEquipo(id, nombre) {
+    if (!confirm(`¿Eliminar "${nombre}"?`)) return;
+    try {
+      await fetch(`${API}/api/equipos/${id}`, { method:'DELETE' });
+      mostrarToast('Equipo eliminado','verde'); cargarTodo();
+    } catch(e) { mostrarToast('Error de conexión','rojo'); }
+  }
+
+  // Modal préstamo
+  function abrirModalPrestamo(id) {
+    equipoSeleccionado = todosLosEquipos.find(e => e.id === id);
+    if (!equipoSeleccionado) return;
+    document.getElementById('detalle-equipo').innerHTML = `
+      <strong>${equipoSeleccionado.nombre}</strong>
+      <span>${equipoSeleccionado.categoria} · ${equipoSeleccionado.stock_disponible} unidades disponibles</span>
+    `;
+    document.getElementById('p-cantidad').value = '1';
+    document.getElementById('p-cantidad').max   = equipoSeleccionado.stock_disponible;
+    abrirModal('modal-prestamo-bg');
+  }
+
+  async function confirmarPrestamo() {
+    const cantidad = parseInt(document.getElementById('p-cantidad').value);
+    if (!cantidad || cantidad < 1) { mostrarToast('Ingresa una cantidad válida','rojo'); return; }
+    try {
+      const res = await fetch(`${API}/api/prestamos`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id_equipo: equipoSeleccionado.id, id_usuario: usuario.id, cantidad })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        mostrarToast(`Préstamo de "${equipoSeleccionado.nombre}" confirmado ✓`, 'azul');
+        cerrarModal('modal-prestamo-bg'); cargarTodo();
+      } else mostrarToast(data.error||'Error al registrar préstamo','rojo');
+    } catch(e) { mostrarToast('Error de conexión','rojo'); }
+  }
+
+  // Helpers modal con animación
+  function abrirModal(id) {
+    const bg = document.getElementById(id);
+    bg.style.display = 'flex';
+    requestAnimationFrame(() => bg.classList.add('abierto'));
+  }
+  function cerrarModal(id) {
+    const bg = document.getElementById(id);
+    bg.classList.remove('abierto');
+    setTimeout(() => bg.style.display = 'none', 260);
+  }
+
+  async function cerrarSesion() {
+    await fetch(`${API}/api/logout`, { method:'POST', credentials:'include' });
+    localStorage.removeItem('usuario');
+    window.location.href = 'index.html';
+  }
+
+  function mostrarToast(msg, tipo='verde') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${tipo} visible`;
+    setTimeout(() => t.classList.remove('visible'), 3200);
+  }
+
+  document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', function(e) { if (e.target === this) cerrarModal(this.id); });
+  });
+
+  cargarTodo();
+</script>
+</body>
+</html>
